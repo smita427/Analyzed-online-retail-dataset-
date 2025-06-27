@@ -1,0 +1,162 @@
+QUESTION UNDERTAKE:
+
+1. Which products are the top 10 best sellers by quantity?
+2. How do sales vary by country?
+3. What is the trend of total sales over time?
+4. Which product categories contribute the most revenue?
+5. Is there a relationship between unit price and quantity sold?
+
+  #1 Which products are the top 10 best sellers by quantity?
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import openpyxl
+import plotly.express as px
+FileName="Online Retail.xlsx"
+Df1 = pd.read_excel(FileName)
+
+#print(Df1)
+print(Df1.head(10))
+Df1['InvoiceDate']=pd.to_datetime(Df1['InvoiceDate'])
+
+print(Df1.info())
+print(Df1.isnull().sum())
+Df1.fillna({'Description':"Unknown"},inplace=True)
+print(Df1.shape)
+
+Df1['Total Amount']=Df1["Quantity"]*Df1["UnitPrice"]
+print(Df1.head())
+
+
+top_10 = pd.DataFrame(Df1.groupby("Description")["Quantity"].sum())
+top_10 = pd.DataFrame(Df1.groupby("Description")["Quantity"].sum().sort_values(ascending=False))
+(top_10.head(10)).plot(kind="bar")
+#Df1.plot(kind="bar")
+plt.xlabel("Description")
+plt.ylabel("Quantity")
+plt.title("TOP 10 BEST SELLER BY QUANTITY ")
+plt.show()
+
+
+
+2.
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import openpyxl
+import seaborn as sns
+
+FileName = "Online Retail.xlsx"
+Df1 = pd.read_excel(FileName)
+#How do sales vary by country?
+
+Df1['Total Amount']=Df1["Quantity"]*Df1["UnitPrice"]
+print(Df1.head())
+
+Df2 = Df1.groupby("Country")["Total Amount"].sum()
+Df2 = pd.DataFrame(Df1.groupby("Country")["Total Amount"].sum().sort_values(ascending=False))
+Df2.head(10)
+print(Df2)
+Df2.head(10).plot(kind='bar')
+plt.xlabel("Country")
+plt.ylabel("Total Amount")
+plt.title("SALES VARY BY COUNTRY")
+plt.show()
+
+#average
+Df3=Df1.groupby("Country")["Quantity"].mean().sort_values(ascending=False).head(10).plot(kind='bar')
+Df3=(pd.DataFrame(Df1.groupby("Country")["Quantity"].mean().sort_values(ascending=False)))
+print(Df3.head(10))
+Df3.head(10).plot(kind="bar")
+plt.xlabel("Country")
+plt.ylabel("Quantity")
+plt.title(" AVERAGE QUANTITY SALES VARY BY COUNTRY")
+plt.show()
+
+
+#What is the trend of total sales over time(categorize in months)?
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+import openpyxl
+import seaborn as sns
+
+
+FileName="Online Retail.xlsx"
+Df1 = pd.read_excel(FileName)
+#print(Df1)
+
+
+Df1['Total Amount']=Df1["Quantity"]*Df1["UnitPrice"]
+print(Df1.head())
+Df1['InvoiceDate']=pd.to_datetime(Df1['InvoiceDate'])
+#time_list = list(Df1.InvoiceDate)
+#Time = pd.DataFrame(pd.to_datetime(time_list), columns=['time'])
+#Df1['time'] = Timeframe['time'].values
+#print(Df1.head())
+
+
+Df1.set_index('InvoiceDate', inplace=True)
+monthly_sales = Df1['Total Amount'].resample('ME').sum()
+plt.figure(figsize=(10, 6))
+plt.plot(monthly_sales.index, monthly_sales.values,marker='o')
+plt.title('Monthly Sales Over Time')
+plt.xlabel('MONTHS')
+plt.ylabel('TOTAL SALES')
+plt.grid(True)
+plt.show()
+
+
+#Which product categories contribute the most revenue?
+
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import openpyxl
+import seaborn as sns
+#Which product categories contribute the most revenue?
+FileName = "Online Retail.xlsx"
+Df1 = pd.read_excel(FileName)
+
+Df1['Total_Sales'] = Df1.Quantity * Df1.UnitPrice
+
+revenue_contribution = Df1.groupby('Description')['Total_Sales'].sum().reset_index().\
+    sort_values('Total_Sales',ascending=False)
+
+Df2 = sns.barplot(data=revenue_contribution.head(10) ,x='Total_Sales', y='Description', \
+                palette = 'Set1', hue='Description')
+plt.title("Revenue Contribution")
+plt.yticks(rotation=45)
+# show value on Bar
+for i in Df2.containers:
+    Df2.bar_label(i)
+plt.show()
+
+
+
+#Is there a relationship between unit price and quantity sold?
+
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import openpyxl
+import seaborn as sns
+
+FileName = "Online Retail.xlsx"
+Df1 = pd.read_excel(FileName)
+# 5. Is there a relationship between unit price and quantity sold?
+
+# Create correlation matrix
+cor_matrix = np.corrcoef(Df1.UnitPrice, Df1.Quantity)
+#print(corr_matrix)
+
+# Plot Correlation Matrix
+plt.imshow(cor_matrix, cmap='Set2')
+plt.colorbar()
+plt.show()
